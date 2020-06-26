@@ -4,23 +4,29 @@
 	<title>Conway's Game of Life</title>
 </head>
 <body>
-	<div id="container">
-		<div class="row" index="1">
-			
-		</div>
+	<div id="world">
+		
 	</div>
+
+	<button>Next</button>
 	<script type="text/javascript">
 
 		// Vista ===============================================
 		function createBox(row, column, checked){
-			return `<input type="checkbox" ${checked ? "checked" : ""} row="${row}" column="${column}">`
+
+			return `<input type="checkbox" ${checked ? "checked" : ""} row="${row}" column="${column}">`;
 		}
 
 
-		let container = document.querySelector('#container');
+		let body = document.querySelector("#world");
 		function addBox(container, row, column, checked){
-
 			container.innerHTML += createBox(row, column, checked);
+
+		}
+
+		function addContainer(row){
+			body.innerHTML += `<div class="container" row="${row}"></div>`;
+
 		}
 
 		function createLand(totalRows, totalColumns, randon){
@@ -32,7 +38,7 @@
 				for(let column = 0; column < totalColumns; column++){
 					if (randon){
 						let value = Math.floor(Math.random() * 10);
-						rows.push(value <= 5);
+						rows.push(value <= 2);
 					} else {
 						rows.push(false);
 					}
@@ -46,11 +52,11 @@
 
 		function render(world){
 			for(let fila in world.rowLength()){
-				let value = "|";
+				let value = fila + " |";
 				for(let col in world.columnLength(fila)){
-					//value += world.getStatus(fila, col)? "O|" : " |";
+					//value += world.getStatus(fila, col)? "*|" : " |";
 					if(world.getStatus(fila, col)){
-						value += (world.getStatus(fila, col) === "X")? "X|" : "O|";
+						value += (world.getStatus(fila, col) === "X")? "X|" : "*|";
 					} else {
 						value += " |";
 					}
@@ -59,9 +65,22 @@
 			}
 		}
 
+
+		function renderWeb(world){
+			body.innerHTML = "";
+			for(let fila in world.rowLength()){
+				addContainer(fila);
+				let container = document.querySelector(`div[row="${fila}"]`);
+				
+				for(let columna in world.columnLength(fila)){
+					addBox(container, fila, columna, world.getStatus(fila, columna));
+				}
+			}
+		}
+
 		// Modelo ===============================================
 		let world = {
-			_land: createLand(5, 5, true),
+			_land: createLand(10, 10, true),
 
 			getStatus:      function(row, column) {return this._land[row][column]},
 			setAlive: function(row, column) {return this._land[row][column] = true},
@@ -113,7 +132,7 @@
 							break;
 					}
 				} catch (e) {
-					console.log(`nothing there [${row}][${column}]`);
+					//console.log(`nothing there [${row}][${column}]`);
 
 					value = false;
 				} finally {
@@ -127,29 +146,44 @@
 				let n = 0;
 
 			 	for(let position of this.positions){
-			 		n += this.getAdjasent(row, column, position)? 1 : 0;
+			 		//console.warn(this.getAdjasent(row, column, position)? 1 : 0);
+			 		n += this.getAdjasent(Number(row), Number(column), position)? 1 : 0;
 			 	}
-
-			 	console.log(n);
-
 				return n;
 			},
 		};
 
 		function next(){
 			for(let fila in world.rowLength()){
+
+				let dies = [];
+				let alives = [];
+
 				for(let columna in world.columnLength(fila)){
 					let neigthbors = world.numberOfNaigthbors(fila, columna);
-					if((neigthbors < 2) || (neigthbors > 3)){
 
-					console.log(`land[${fila}][${columna}]: ${world.numberOfNaigthbors(fila, columna)}`);
-						world.setDie(fila, columna);
+					if((neigthbors < 2) || (neigthbors > 3)){
+						dies.push([fila, columna]);
+					}
+
+					if((neigthbors >= 2) && (neigthbors <= 3)){
+						alives.push([fila, columna]);
 					}
 				}
+
+				dies.forEach(e => world.setDie(e[0], e[1]));
+				alives.forEach(e => world.setAlive(e[0], e[1]));
 			}
+
+			render(world);
+
+			renderWeb(world);
 		}
 		
 		render(world);
+
+		renderWeb(world);
+		next(world);
 
 	</script>
 </body>
