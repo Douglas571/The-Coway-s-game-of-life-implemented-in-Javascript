@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Conway's Game of Life</title>
+</head>
+<body>
+	<div id="container">
+		<div class="row" index="1">
+			
+		</div>
+	</div>
+	<script type="text/javascript">
+
+		// Vista ===============================================
+		function createBox(row, column, checked){
+			return `<input type="checkbox" ${checked ? "checked" : ""} row="${row}" column="${column}">`
+		}
+
+
+		let container = document.querySelector('#container');
+		function addBox(container, row, column, checked){
+
+			container.innerHTML += createBox(row, column, checked);
+		}
+
+		function createLand(totalRows, totalColumns, randon){
+			var land = [];
+			
+			for(let row = 0; row < totalRows; row++){
+				let rows = [];
+
+				for(let column = 0; column < totalColumns; column++){
+					if (randon){
+						let value = Math.floor(Math.random() * 10);
+						rows.push(value <= 5);
+					} else {
+						rows.push(false);
+					}
+				}
+
+				land.push(rows);
+			}
+
+			return land;
+		}
+
+		function render(world){
+			for(let fila in world.rowLength()){
+				let value = "|";
+				for(let col in world.columnLength(fila)){
+					//value += world.getStatus(fila, col)? "O|" : " |";
+					if(world.getStatus(fila, col)){
+						value += (world.getStatus(fila, col) === "X")? "X|" : "O|";
+					} else {
+						value += " |";
+					}
+				}
+				console.log(value);
+			}
+		}
+
+		// Modelo ===============================================
+		let world = {
+			_land: createLand(5, 5, true),
+
+			getStatus:      function(row, column) {return this._land[row][column]},
+			setAlive: function(row, column) {return this._land[row][column] = true},
+			setDie:   function(row, column) {return this._land[row][column] = false},
+
+			rowLength: function() {return this._land},
+			columnLength: function(row) {return this._land[row]},
+
+			positions: [
+				"top",
+				"botton",
+				"left",
+				"left-top",
+				"left-botton",
+				"rigth",
+				"rigth-top",
+				"rigth-botton",
+			],
+
+			getAdjasent: function(row, column, position) {
+				let value = false;
+
+				try {
+					switch(position){
+
+						case "top":
+							return this._land[row - 1][column];
+							break;
+						case "botton":
+							return this._land[row + 1][column];
+							break;
+						case "left":
+							return this._land[row][column - 1];
+							break; 
+						case "left-top":
+							return this._land[row - 1][column - 1];
+							break;
+						case "left-botton":
+							return this._land[row + 1][column - 1];
+							break;
+						case "rigth":
+							return this._land[row][column + 1];
+							break;
+						case "rigth-top":
+							return this._land[row - 1][column + 1];
+							break;
+						case "rigth-botton":
+							return this._land[row + 1][column + 1];
+							break;
+					}
+				} catch (e) {
+					console.log(`nothing there [${row}][${column}]`);
+
+					value = false;
+				} finally {
+
+				}
+				
+				return value;				
+			},
+
+			numberOfNaigthbors: function(row, column){
+				let n = 0;
+
+			 	for(let position of this.positions){
+			 		n += this.getAdjasent(row, column, position)? 1 : 0;
+			 	}
+
+			 	console.log(n);
+
+				return n;
+			},
+		};
+
+		function next(){
+			for(let fila in world.rowLength()){
+				for(let columna in world.columnLength(fila)){
+					let neigthbors = world.numberOfNaigthbors(fila, columna);
+					if((neigthbors < 2) || (neigthbors > 3)){
+
+					console.log(`land[${fila}][${columna}]: ${world.numberOfNaigthbors(fila, columna)}`);
+						world.setDie(fila, columna);
+					}
+				}
+			}
+		}
+		
+		render(world);
+
+	</script>
+</body>
+</html>
