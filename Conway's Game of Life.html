@@ -8,7 +8,7 @@
 		
 	</div>
 
-	<button>Next</button>
+	<button onclick="next(world)">Next</button>
 	<script type="text/javascript">
 
 		// Vista ===============================================
@@ -19,15 +19,6 @@
 
 
 		let body = document.querySelector("#world");
-		function addBox(container, row, column, checked){
-			container.innerHTML += createBox(row, column, checked);
-
-		}
-
-		function addContainer(row){
-			body.innerHTML += `<div class="container" row="${row}"></div>`;
-
-		}
 
 		function createLand(totalRows, totalColumns, randon){
 			var land = [];
@@ -68,19 +59,20 @@
 
 		function renderWeb(world){
 			body.innerHTML = "";
+			buffer = "";
 			for(let fila in world.rowLength()){
-				addContainer(fila);
-				let container = document.querySelector(`div[row="${fila}"]`);
-				
+				buffer += `<div class="container" row="${fila}">`;				
 				for(let columna in world.columnLength(fila)){
-					addBox(container, fila, columna, world.getStatus(fila, columna));
+					buffer += createBox(fila, columna, world.getStatus(fila, columna));
 				}
+				buffer += `</div>`;
 			}
+			body.innerHTML += buffer;
 		}
 
 		// Modelo ===============================================
 		let world = {
-			_land: createLand(10, 10, true),
+			_land: createLand(20, 20, true),
 
 			getStatus:      function(row, column) {return this._land[row][column]},
 			setAlive: function(row, column) {return this._land[row][column] = true},
@@ -174,13 +166,8 @@
 				dies.forEach(e => world.setDie(e[0], e[1]));
 				alives.forEach(e => world.setAlive(e[0], e[1]));
 			}
-
-			render(world);
-
 			renderWeb(world);
 		}
-		
-		render(world);
 
 		renderWeb(world);
 		next(world);
