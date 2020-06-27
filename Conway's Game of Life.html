@@ -29,13 +29,19 @@
 				for(let column = 0; column < totalColumns; column++){
 					if (randon){
 						let value = Math.floor(Math.random() * 10);
-						rows.push(value <= 2);
+						rows.push(value < 1);
 					} else {
 						rows.push(false);
 					}
 				}
 
 				land.push(rows);
+			}
+
+			if(!randon){
+				land[5][5-1] = true;
+				land[5][5+1] = true;
+				land[5-1][5] = true;
 			}
 
 			return land;
@@ -72,7 +78,7 @@
 
 		// Modelo ===============================================
 		let world = {
-			_land: createLand(20, 20, true),
+			_land: createLand(15, 15, false),
 
 			getStatus:      function(row, column) {return this._land[row][column]},
 			setAlive: function(row, column) {return this._land[row][column] = true},
@@ -167,10 +173,11 @@
 				alives.forEach(e => world.setAlive(e[0], e[1]));
 			}
 			renderWeb(world);
+			render(world);
 		}
 
 		renderWeb(world);
-		next(world);
+		render(world);
 
 	</script>
 </body>
